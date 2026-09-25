@@ -1,7 +1,7 @@
 CREATE TABLE kullanici_yetkileri (
     id SERIAL PRIMARY KEY,
     sicil VARCHAR(20) NOT NULL,
-    firma_kodu INT NOT NULL,
+    firma_kodu VARCHAR(50) NOT NULL,
     rol_kodu INT NOT NULL,
     tanimlayan_kullanici_sicil VARCHAR(20),
     durum BOOLEAN DEFAULT TRUE,
