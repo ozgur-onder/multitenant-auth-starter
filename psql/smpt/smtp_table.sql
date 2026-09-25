@@ -1,0 +1,16 @@
+CREATE TABLE smtp_ayarlari (
+    id SERIAL PRIMARY KEY,
+    firma_kodu VARCHAR(50),
+    rol_id INT,
+    rapor_kodu VARCHAR(100),
+    sunucu VARCHAR(255) NOT NULL,
+    port INT NOT NULL,
+    kullanici_adi VARCHAR(255) NOT NULL,
+    sifre VARCHAR(255) NOT NULL,
+    gonderici_adi VARCHAR(255),
+    varsayilan_mi BOOLEAN DEFAULT FALSE,
+    olusturma_guncelleme_zamani TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    olusturan_guncelleyen_sicil VARCHAR(20),
+    FOREIGN KEY (firma_kodu) REFERENCES firma(firma_kodu),
+    FOREIGN KEY (rol_id) REFERENCES roller(id),
+    FOREIGN KEY (olusturan_guncelleyen_sicil) REFERENCES kullanicilar(sicil));

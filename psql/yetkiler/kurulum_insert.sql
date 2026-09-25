@@ -1,0 +1,18 @@
+INSERT INTO yetkiler (id, modul, yetki_kodu, yetki_adi) VALUES
+(1, 'SAYFA YÖNETİMİ', 'sayfa_anasayfa', 'Anasayfa'),
+(2, 'SAYFA YÖNETİMİ', 'sayfa_sistem', 'Sistem Yönetimi'),
+(3, 'SAYFA YÖNETİMİ', 'sayfa_kullanici', 'Kullanıcı Yönetimi'),
+(4, 'SAYFA YÖNETİMİ', 'sayfa_profil', 'Profilim'),
+(5, 'KART YÖNETİMİ',  'kart_firma', 'Firma Yönetimi'),
+(6, 'KART YÖNETİMİ',  'kart_rol', 'Rol Yönetimi'),
+(7, 'KART YÖNETİMİ',  'kart_yetki_matrisi', 'Rol & Yetki Matrisi'),
+(8, 'KART İÇİ BUTON YÖNETİMİ', 'firma_yonetimi_duzenle_butonu', 'Firma Yönetimi Kartı Düzenle Butonu'),
+(9, 'KART İÇİ BUTON YÖNETİMİ', 'firma_yonetimi_aktif_pasif_butonu', 'Firma Yönetimi Kartı Aktif/Pasif Butonu'),
+(10, 'KART İÇİ BUTON YÖNETİMİ', 'firma_yonetimi_loglari_indir_butonu', 'Firma Yönetimi Kartı Logları İndir Butonu'),
+(11, 'KART İÇİ BUTON YÖNETİMİ', 'firma_yonetimi_excele_aktar_butonu', 'Firma Yönetimi Kartı Excele Aktar Butonu'),
+(12, 'KART İÇİ BUTON YÖNETİMİ', 'firma_yonetimi_yeni_firma_ekle_butonu', 'Firma Yönetimi Kartı Yeni Firma Ekle Butonu'),
+(13, 'KART İÇİ BUTON YÖNETİMİ', 'rol_yonetimi_duzenle_butonu', 'Rol Yönetimi Kartı Düzenle Butonu'),
+(14, 'KART İÇİ BUTON YÖNETİMİ', 'rol_yonetimi_aktif_pasif_butonu', 'Rol Yönetimi Kartı Aktif/Pasif Butonu'),
+(15, 'KART İÇİ BUTON YÖNETİMİ', 'rol_yonetimi_loglari_indir_butonu', 'Rol Yönetimi Kartı Logları İndir Butonu'),
+(16, 'KART İÇİ BUTON YÖNETİMİ', 'rol_yonetimi_excele_aktar_butonu', 'Rol Yönetimi Kartı Excele Aktar Butonu'),
+(17, 'KART İÇİ BUTON YÖNETİMİ', 'rol_yonetimi_yeni_rol_ekle_butonu', 'Rol Yönetimi Kartı Yeni Rol Ekle Butonu');

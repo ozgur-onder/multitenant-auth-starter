@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+cryptography
+nicegui
+openpyxl
+python-dotenv
+asyncpg
+passlib[bcrypt]
+PyJWT
+SQLAlchemy
+alembic
