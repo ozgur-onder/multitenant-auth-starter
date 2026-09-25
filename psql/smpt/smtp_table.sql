@@ -12,5 +12,5 @@ CREATE TABLE smtp_ayarlari (
     olusturma_guncelleme_zamani TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     olusturan_guncelleyen_sicil VARCHAR(20),
     FOREIGN KEY (firma_kodu) REFERENCES firma(firma_kodu),
-    FOREIGN KEY (rol_id) REFERENCES roller(id),
+    FOREIGN KEY (rol_kodu) REFERENCES roller(rol_kodu),
     FOREIGN KEY (olusturan_guncelleyen_sicil) REFERENCES kullanicilar(sicil));

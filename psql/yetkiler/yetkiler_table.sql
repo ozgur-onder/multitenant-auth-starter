@@ -4,4 +4,3 @@ CREATE TABLE yetkiler (
     yetki_kodu  VARCHAR(100) UNIQUE NOT NULL,
     yetki_adi   VARCHAR(100) NOT NULL,
     durum       BOOLEAN DEFAULT TRUE,
-    CONSTRAINT uq_modul_yetki UNIQUE (modul, yetki_kodu));

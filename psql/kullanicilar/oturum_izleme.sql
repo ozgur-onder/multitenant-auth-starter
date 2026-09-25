@@ -1,7 +1,7 @@
 CREATE TABLE kullanici_oturumlari (
     id SERIAL PRIMARY KEY,
-    sicil VARCHAR(20) NOT NULL,
-    oturum_token VARCHAR(255) UNIQUE NOT NULL,
+    sicil TEXT NOT NULL,
+    oturum_token TEXT UNIQUE NOT NULL,
     ip_adresi INET,
     tarayici TEXT,
     giris_zamani TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

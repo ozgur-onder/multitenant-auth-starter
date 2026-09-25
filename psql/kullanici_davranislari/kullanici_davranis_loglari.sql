@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS sayfa_ziyaret_loglari (
     sicil           VARCHAR(20) NOT NULL,
     sayfa           VARCHAR(200) NOT NULL,
     sayfa_basligi   VARCHAR(200),
-    oturum_token    VARCHAR(255),
+    oturum_token    TEXT NOT NULL,
     giris_zamani    TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     son_guncelleme  TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     sure_saniye     INTEGER DEFAULT 0,
