@@ -7,5 +7,5 @@ CREATE TABLE kullanici_yetkileri (
     durum BOOLEAN DEFAULT TRUE,
     olusturma_zamani TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (sicil) REFERENCES kullanicilar(sicil),
-    FOREIGN KEY (firma_kodu) REFERENCES firma(id),
-    FOREIGN KEY (rol_kodu) REFERENCES roller(id));
+    FOREIGN KEY (firma_kodu) REFERENCES firma(firma_kodu),
+    FOREIGN KEY (rol_kodu) REFERENCES roller(rol_kodu));
