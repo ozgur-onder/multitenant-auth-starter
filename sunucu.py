@@ -1,9 +1,9 @@
 # sunucu.py — Uygulamanın başlangıç noktası. Sunucu buradan ayağa kalkar.
 
-import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI  # API iskeleti
 from nicegui import ui       # Web arayüzü (sayfa, buton, form vb.)
+from merkez.ayarlar import ENCRYPTION_KEY
 
 # Veritabanı bağlantı havuzunu başlatan ve kapatan fonksiyonlar
 from merkez.veritabani import vt_havuzunu_baslat, vt_havuzunu_kapat
@@ -76,13 +76,7 @@ async def ana_sayfa():
         ui.navigate.to("/kurulum")
 
 
-# ENCRYPTION_KEY ortam değişkenini oku.
-# ⚠️ Gerçek sunucuda Portainer'da bu değişkeni mutlaka tanımla.
-# Tanımlanmazsa "gelistirme_anahtari" kullanılır — bu güvensizdir.
-# Bu anahtar, kullanıcı oturum çerezlerini şifrelemek için kullanılır.
-encryption_key = os.environ.get("ENCRYPTION_KEY", "gelistirme_anahtari")
-
 # NiceGUI'yi mevcut FastAPI uygulamasına bağlayarak sunucuyu başlat.
 # ui.run() değil ui.run_with() — çünkü app'i biz oluşturduk, o sadece ekleniyor.
 # storage_secret olmazsa nicegui_app.storage.user çalışmaz.
-ui.run_with(app, title="İş Zekası Platformu", storage_secret=encryption_key)
+ui.run_with(app, title="İş Zekası Platformu", storage_secret=ENCRYPTION_KEY)
