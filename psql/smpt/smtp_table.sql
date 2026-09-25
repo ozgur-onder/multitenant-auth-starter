@@ -1,7 +1,7 @@
 CREATE TABLE smtp_ayarlari (
     id SERIAL PRIMARY KEY,
     firma_kodu VARCHAR(50),
-    rol_id INT,
+    rol_kodu INT,
     rapor_kodu VARCHAR(100),
     sunucu VARCHAR(255) NOT NULL,
     port INT NOT NULL,
