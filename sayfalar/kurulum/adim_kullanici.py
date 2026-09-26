@@ -3,35 +3,39 @@ from merkez.servisler.kurulum import ilk_kurulumu_yap
 from merkez.servisler.smtp import smtp_ayarlarini_kaydet
 from merkez.semalar.kurulum import KurulumGirisi
 from merkez.semalar.smtp import SmtpAyarlariGirisi
-from ._yardimci import _alan
+from ._yardimci import _alan, _metin, _aciklama
 
 
 def kullanici_adimini_olustur(stepper, smtp_verisi: dict) -> None:
     with ui.step("Firma ve Sistem Yöneticisi"):
-        with ui.row().classes("w-full gap-2"):
-            fk    = _alan("Firma Kodu *", "FIRMA01")
-            fa    = _alan("Firma Adı *",  "Örnek A.Ş.")
-        ui.separator().classes("q-my-xs")
-        sicil  = _alan("Sicil No *",  "10001")
-        with ui.row().classes("w-full gap-2"):
-            ad    = _alan("Ad *")
-            soyad = _alan("Soyad *")
-        email  = _alan("E-posta *",  "admin@firma.com")
-        parola = _alan("Parola *",   password=True)
-        hata   = ui.label("").classes("text-negative text-caption")
-        yukl   = ui.spinner(size="sm").classes("hidden")
+        _aciklama(
+            "Firmanızı ve sisteme ilk giriş yapacak yönetici hesabını oluşturun. "
+            "Bu kullanıcı, en yüksek yetkiye sahip Sistem Yöneticisi rolüyle oluşturulur."
+        )
+        with ui.row().classes("w-full gap-2 flex-nowrap"):
+            fk = _alan("Firma Kodu *", "FIRMA01",         genislik="w-32")
+            fa = _alan("Firma Adı *",  "ABC Holding A.Ş.", genislik="flex-1")
+        with ui.row().classes("w-full gap-2 flex-nowrap"):
+            sicil = _alan("Sicil No *", "10001",           genislik="w-32")
+            email = _alan("E-posta *",  "admin@firma.com", genislik="flex-1")
+        with ui.row().classes("w-full gap-2 flex-nowrap"):
+            ad     = _alan("Ad *",     genislik="flex-1")
+            soyad  = _alan("Soyad *",  genislik="flex-1")
+            parola = _alan("Parola *", password=True, genislik="flex-1")
+        hata = ui.label("").classes("text-negative text-caption")
+        yukl = ui.spinner(size="sm").classes("hidden")
 
         async def tamamla():
             hata.text = ""
-            if any(not str(v.value or "").strip() for v in [fk, fa, sicil, ad, soyad, email, parola]):
+            if any(not _metin(v) for v in [fk, fa, sicil, ad, soyad, email, parola]):
                 hata.text = "Yıldızlı (*) tüm alanlar zorunludur."
                 return
             yukl.classes(remove="hidden")
             try:
                 giris = KurulumGirisi(
-                    sicil=sicil.value.strip(), ad=ad.value.strip(), soyad=soyad.value.strip(),
-                    email=email.value.strip(), parola=parola.value,
-                    firma_kodu=fk.value.strip().upper(), firma_adi=fa.value.strip(),
+                    sicil=_metin(sicil), ad=_metin(ad), soyad=_metin(soyad),
+                    email=_metin(email), parola=parola.value or "",
+                    firma_kodu=_metin(fk).upper(), firma_adi=_metin(fa),
                 )
                 await ilk_kurulumu_yap(giris)
                 await smtp_ayarlarini_kaydet(SmtpAyarlariGirisi(

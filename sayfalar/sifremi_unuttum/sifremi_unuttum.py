@@ -10,16 +10,17 @@ async def sifremi_unuttum_sayfasi():
             ui.separator()
             ui.label("E-posta adresinizi girin, şifre sıfırlama bağlantısı göndereceğiz.").classes("text-caption text-grey-7")
 
-            email = ui.input("E-posta", placeholder="ornek@firma.com").classes("w-full")
+            email = ui.input("E-posta", placeholder="Örn: ornek@firma.com").classes("w-full")
             bilgi  = ui.label("").classes("text-caption")
 
             async def gonder():
                 bilgi.text = ""
-                if not email.value.strip():
+                adres = (email.value or "").strip()
+                if not adres:
                     bilgi.classes(replace="text-negative text-caption")
                     bilgi.text = "E-posta adresi boş olamaz."
                     return
-                await sifirlama_talebi_olustur(email.value.strip())
+                await sifirlama_talebi_olustur(adres)
                 bilgi.classes(replace="text-positive text-caption")
                 bilgi.text = "Eğer bu e-posta kayıtlıysa, sıfırlama bağlantısı gönderildi."
 

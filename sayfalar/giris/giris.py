@@ -15,18 +15,19 @@ async def giris_sayfasi():
             ui.label("Giriş Yap").classes("text-2xl font-bold text-center")
             ui.separator()
 
-            sicil  = ui.input("Sicil No", placeholder="10001").classes("w-full")
+            sicil  = ui.input("Sicil No", placeholder="Örn: 10001").classes("w-full")
             parola = ui.input("Parola").props("type=password").classes("w-full")
             hata   = ui.label("").classes("text-negative text-caption")
 
             async def giris_yap():
                 hata.text = ""
-                if not sicil.value.strip() or not parola.value:
+                sicil_no = (sicil.value or "").strip()
+                if not sicil_no or not parola.value:
                     hata.text = "Sicil ve parola boş olamaz."
                     return
                 try:
                     sonuc = await servis_giris.giris_yap(
-                        GirisGirisi(sicil=sicil.value.strip(), parola=parola.value)
+                        GirisGirisi(sicil=sicil_no, parola=parola.value)
                     )
                     nicegui_app.storage.user["oturum_token"] = sonuc.token
                     ui.navigate.to("/panel")
