@@ -12,7 +12,7 @@ services:
       - ./psql:/psql:ro
       - ./psql/kurulum.sh:/docker-entrypoint-initdb.d/00_kurulum.sh:ro
     ports:
-      - "5432:5432"
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-multitenant_auth}"]
       interval: 10s
@@ -24,7 +24,6 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      # Yerel .env'deki localhost adresini Docker servis adıyla geçersiz kıl
       VERITABANI_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_SIFRE}@veritabani:5432/${POSTGRES_DB:-multitenant_auth}
     ports:
       - "8000:8000"
