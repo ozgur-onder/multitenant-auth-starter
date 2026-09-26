@@ -7,7 +7,8 @@ from email.utils import formataddr
 from typing import Callable
 from asyncpg.pool import PoolConnectionProxy
 from merkez.veritabani import vt_getir
-from merkez.sabitler import SISTEM_YONETICISI_ROL_KODU
+from merkez.eposta_sablonlari import Eposta
+from merkez.sabitler import SISTEM_YONETICISI_ROL_KODU, VARSAYILAN_SMTP_RAPOR_KODU
 from merkez.semalar.smtp import SmtpBilgileri
 
 _ZAMAN_ASIMI_SANIYE = 10
@@ -40,12 +41,14 @@ def _sadece_giris_dene(bilgiler: SmtpBilgileri) -> None:
         pass
 
 
-def _eposta_gonder(bilgiler: SmtpBilgileri, alici: str, konu: str, govde: str) -> None:
+def _eposta_gonder(bilgiler: SmtpBilgileri, alici: str, eposta: Eposta) -> None:
     mesaj = EmailMessage()
     mesaj["From"] = formataddr((bilgiler.gonderici_adi, bilgiler.kullanici_adi))
     mesaj["To"] = alici
-    mesaj["Subject"] = konu
-    mesaj.set_content(govde)
+    mesaj["Subject"] = eposta.konu
+    # HTML göstermeyen e-posta istemcileri düz metin sürümünü gösterir.
+    mesaj.set_content(eposta.metin)
+    mesaj.add_alternative(eposta.html, subtype="html")
     with _baglan_ve_giris_yap(bilgiler) as istemci:
         istemci.send_message(mesaj)
 
@@ -77,7 +80,7 @@ async def smtp_baglantisini_test_et(bilgiler: SmtpBilgileri) -> None:
     await _smtp_islemi_calistir(_sadece_giris_dene, bilgiler)
 
 
-async def varsayilan_smtp_ile_gonder(alici: str, konu: str, govde: str) -> None:
+async def varsayilan_smtp_ile_gonder(alici: str, eposta: Eposta) -> None:
     havuz = await vt_getir()
     async with havuz.acquire() as db:
         ayar = await db.fetchrow(
@@ -87,21 +90,27 @@ async def varsayilan_smtp_ile_gonder(alici: str, konu: str, govde: str) -> None:
     if not ayar:
         raise ValueError("Sistemde tanımlı bir e-posta (SMTP) ayarı bulunamadı.")
     bilgiler = SmtpBilgileri(**dict(ayar))
-    await _smtp_islemi_calistir(_eposta_gonder, bilgiler, alici, konu, govde)
+    await _smtp_islemi_calistir(_eposta_gonder, bilgiler, alici, eposta)
 
 
 async def smtp_ayarlarini_kaydet(db: PoolConnectionProxy, firma_kodu: str, olusturan_sicil: str, bilgiler: SmtpBilgileri) -> None:
     await db.execute(
         """INSERT INTO smtp_ayarlari
-           (firma_kodu, rol_kodu, sunucu, port, kullanici_adi, sifre,
+           (firma_kodu, rol_kodu, rapor_kodu, sunucu, port, kullanici_adi, sifre,
             gonderici_adi, varsayilan_mi, olusturan_guncelleyen_sicil)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE, $8);""",
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, TRUE, $9);""",
         firma_kodu,
         SISTEM_YONETICISI_ROL_KODU,
+        VARSAYILAN_SMTP_RAPOR_KODU,
         bilgiler.sunucu,
         bilgiler.port,
         bilgiler.kullanici_adi,
         bilgiler.sifre,
         bilgiler.gonderici_adi,
         olusturan_sicil,
+    )
+    await db.execute(
+        """INSERT INTO smtp_ayarlari_loglari (firma_kodu, sunucu, yapilan_islem, islem_yapan_kullanici_sicil)
+           VALUES ($1, $2, 'SMTP Ayarı Eklendi', $3);""",
+        firma_kodu, bilgiler.sunucu, olusturan_sicil,
     )

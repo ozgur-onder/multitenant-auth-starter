@@ -2,8 +2,7 @@ from contextlib import contextmanager
 from datetime import date
 from typing import Iterator
 from nicegui import ui
-
-UYGULAMA_ADI = "İş Zekası Platformu"
+from merkez.sabitler import UYGULAMA_ADI
 
 
 @contextmanager

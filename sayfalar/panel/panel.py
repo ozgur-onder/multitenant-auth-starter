@@ -1,51 +1,33 @@
 from nicegui import ui, app as nicegui_app
-from merkez.servisler import giris as servis_giris
+from merkez.servisler.panel import oturum_kullanicisini_getir
+from merkez.servisler.yetki import kullanicinin_yetki_kodlari
+from .baglam import PanelBaglami
+from .menu import izinli_menu_ogeleri
+from .sekme_yoneticisi import SekmeYoneticisi
+from .sol_menu import sol_menu_olustur
+from .ust_bar import ust_bar_olustur
 
 
 @ui.page("/panel")
 async def panel_sayfasi():
     token = nicegui_app.storage.user.get("oturum_token")
-    if not token or not await servis_giris.oturum_kontrol(token):
+    kullanici = await oturum_kullanicisini_getir(token) if token else None
+    if not token or not kullanici:
         ui.navigate.to("/giris")
         return
 
-    try:
-        from merkez.veritabani import vt_getir
-        havuz = await vt_getir()
-        async with havuz.acquire() as db:
-            kayit = await db.fetchrow(
-                "SELECT sicil FROM kullanici_oturumlari WHERE oturum_token = $1;", token
-            )
-            if kayit:
-                await db.execute(
-                    """INSERT INTO sayfa_ziyaret_loglari (sicil, sayfa, sayfa_basligi, oturum_token)
-                       VALUES ($1, '/panel', 'Panel', $2);""",
-                    kayit["sicil"], token,
-                )
-    except Exception:
-        pass
+    baglam = PanelBaglami(kullanici=kullanici, yetkiler=await kullanicinin_yetki_kodlari(kullanici.sicil))
+    ogeler = izinli_menu_ogeleri(baglam.yetkiler)
 
-    async def cikis_yap():
-        t = nicegui_app.storage.user.pop("oturum_token", None)
-        if t:
-            await servis_giris.cikis_yap(t)
-        ui.navigate.to("/giris")
+    ui.query("body").classes("bg-grey-1")
+    yonetici = SekmeYoneticisi(baglam, token)
+    cekmece = sol_menu_olustur(baglam, ogeler, yonetici)
+    ust_bar_olustur(baglam, ogeler, yonetici, cekmece)
 
-    with ui.column().classes("w-full"):
-        with ui.row().classes("w-full items-center justify-between q-pa-md bg-primary text-white"):
-            ui.label("İş Zekası Platformu").classes("text-h6")
-            ui.button("Çıkış Yap", on_click=cikis_yap).props("flat color=white")
-
-        with ui.column().classes("q-pa-md w-full"):
-            ui.label("Hoş Geldiniz").classes("text-h5 q-mb-md")
-            with ui.row().classes("w-full gap-4 flex-wrap"):
-                for baslik, ikon in [
-                    ("Kullanıcılar", "people"),
-                    ("Firmalar", "business"),
-                    ("Roller", "admin_panel_settings"),
-                    ("Yetkiler", "lock"),
-                ]:
-                    with ui.card().classes("flex-1 min-w-36"):
-                        with ui.row().classes("items-center gap-2"):
-                            ui.icon(ikon).classes("text-primary text-2xl")
-                            ui.label(baslik).classes("text-subtitle1")
+    with ui.column().classes("w-full q-pa-md"):
+        yonetici.panel_alani_olustur()
+        if not ogeler:
+            ui.label("Hesabınıza tanımlı bir sayfa yetkisi bulunmuyor. Sistem yöneticinizle görüşün.") \
+                .classes("text-grey-7")
+            return
+    await yonetici.ac(ogeler[0])

@@ -2,6 +2,7 @@ from nicegui import ui
 from merkez.parola_kurallari import eksik_parola_kurallari
 from merkez.servisler.sifre import sifreyi_sifirla
 from sayfalar.ortak.bilesenler import MesajKutusu
+from sayfalar.ortak.istemci import istemci_bilgisi
 from sayfalar.ortak.kimlik_iskeleti import sonuc_ekrani
 
 
@@ -26,7 +27,7 @@ def sifreyi_kaydet_butonu(
 
         buton.props("loading")
         try:
-            await sifreyi_sifirla(token, yeni)
+            await sifreyi_sifirla(token, yeni, ip=istemci_bilgisi().ip)
         except ValueError as e:
             mesaj.hata(str(e))
             return

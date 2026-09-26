@@ -3,7 +3,7 @@ from merkez.guvenlik import sifre_dogrula, jwt_olustur
 from merkez.semalar.giris import GirisGirisi, GirisCiktisi
 
 
-async def giris_yap(veri: GirisGirisi, ip: str = "", tarayici: str = "") -> GirisCiktisi:
+async def giris_yap(veri: GirisGirisi, ip: str | None = None, tarayici: str | None = None) -> GirisCiktisi:
     kimlik = veri.sicil_veya_eposta.strip()
     sorgu = (
         "SELECT sicil, parola FROM kullanicilar WHERE lower(email) = lower($1) AND durum = TRUE;"
@@ -24,7 +24,7 @@ async def giris_yap(veri: GirisGirisi, ip: str = "", tarayici: str = "") -> Giri
         await db.execute(
             """INSERT INTO kullanici_oturumlari (sicil, oturum_token, ip_adresi, tarayici)
                VALUES ($1, $2, $3::inet, $4);""",
-            sicil, token, ip or None, tarayici,
+            sicil, token, ip, tarayici,
         )
         await _giris_logu_kaydet(db, sicil, "basarili", ip, tarayici)
         return GirisCiktisi(token=token, sicil=sicil)
@@ -49,9 +49,9 @@ async def oturum_kontrol(token: str) -> bool:
     return (sayi or 0) > 0
 
 
-async def _giris_logu_kaydet(db, sicil: str, durum: str, ip: str, tarayici: str, hata: str = "") -> None:
+async def _giris_logu_kaydet(db, sicil: str, durum: str, ip: str | None, tarayici: str | None, hata: str = "") -> None:
     await db.execute(
         """INSERT INTO kullanici_giris_loglari (sicil, durum, ip_adresi, tarayici, hata_mesaji)
            VALUES ($1, $2, $3::inet, $4, $5);""",
-        sicil, durum, ip or None, tarayici, hata or None,
+        sicil, durum, ip, tarayici, hata or None,
     )

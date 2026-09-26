@@ -1,6 +1,7 @@
 from nicegui import ui
 from merkez.servisler.sifre import SIFIRLAMA_GECERLILIK_DAKIKA, sifirlama_baglantisi_gonder
 from sayfalar.ortak.bilesenler import alan_degeri, MesajKutusu
+from sayfalar.ortak.istemci import istemci_bilgisi
 from sayfalar.ortak.kimlik_iskeleti import sonuc_ekrani
 from sayfalar.ortak.butonlar.giris_sayfasina_don import giris_sayfasina_don_butonu
 
@@ -15,7 +16,7 @@ def baglanti_gonder_butonu(icerik: ui.column, mesaj: MesajKutusu, *, sicil: ui.i
         adres = alan_degeri(email)
         buton.props("loading")
         try:
-            await sifirlama_baglantisi_gonder(alan_degeri(sicil), adres)
+            await sifirlama_baglantisi_gonder(alan_degeri(sicil), adres, ip=istemci_bilgisi().ip)
         except ValueError as e:
             mesaj.hata(str(e))
             return

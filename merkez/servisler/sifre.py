@@ -5,6 +5,7 @@ from merkez.ayarlar import UYGULAMA_ADRESI
 from merkez.veritabani import vt_getir
 from merkez.guvenlik import sifreyi_hashle
 from merkez.parola_kurallari import eksik_parola_kurallari
+from merkez.eposta_sablonlari import sifre_sifirlama_epostasi
 from merkez.servisler.smtp import varsayilan_smtp_ile_gonder
 
 SIFIRLAMA_GECERLILIK_DAKIKA = 60
@@ -15,7 +16,7 @@ def _token_ozeti(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
-async def sifirlama_baglantisi_gonder(sicil: str, email: str) -> None:
+async def sifirlama_baglantisi_gonder(sicil: str, email: str, ip: str | None = None) -> None:
     havuz = await vt_getir()
     async with havuz.acquire() as db:
         kullanici = await db.fetchrow(
@@ -33,23 +34,19 @@ async def sifirlama_baglantisi_gonder(sicil: str, email: str) -> None:
                 kullanici["sicil"],
             )
             await db.execute(
-                """INSERT INTO sifre_sifirlama_talepleri (sicil, token, gecerlilik_suresi)
-                   VALUES ($1, $2, NOW() + make_interval(mins => $3));""",
-                kullanici["sicil"], _token_ozeti(token), SIFIRLAMA_GECERLILIK_DAKIKA,
+                """INSERT INTO sifre_sifirlama_talepleri (sicil, token, gecerlilik_suresi, ip_adresi)
+                   VALUES ($1, $2, NOW() + make_interval(mins => $3), $4::inet);""",
+                kullanici["sicil"], _token_ozeti(token), SIFIRLAMA_GECERLILIK_DAKIKA, ip,
             )
 
     baglanti = f"{UYGULAMA_ADRESI}/sifre-sifirla?token={quote(token)}"
-    await varsayilan_smtp_ile_gonder(
-        alici=kullanici["email"],
-        konu="Şifre Sıfırlama Talebi",
-        govde=(
-            f"Merhaba {kullanici['ad']} {kullanici['soyad']},\n\n"
-            f"Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın. "
-            f"Bağlantı {SIFIRLAMA_GECERLILIK_DAKIKA} dakika geçerlidir ve yalnızca bir kez kullanılabilir.\n\n"
-            f"{baglanti}\n\n"
-            f"Bu talebi siz yapmadıysanız bu e-postayı dikkate almayın; şifreniz değişmez."
-        ),
+    eposta = sifre_sifirlama_epostasi(
+        ad_soyad=f"{kullanici['ad']} {kullanici['soyad']}",
+        baglanti=baglanti,
+        gecerlilik_dakika=SIFIRLAMA_GECERLILIK_DAKIKA,
+        talep_ip=ip,
     )
+    await varsayilan_smtp_ile_gonder(kullanici["email"], eposta)
 
 
 async def sifirlama_baglantisi_gecerli_mi(token: str) -> bool:
@@ -65,7 +62,7 @@ async def sifirlama_baglantisi_gecerli_mi(token: str) -> bool:
     return (sayi or 0) > 0
 
 
-async def sifreyi_sifirla(token: str, yeni_sifre: str) -> None:
+async def sifreyi_sifirla(token: str, yeni_sifre: str, ip: str | None = None) -> None:
     eksikler = eksik_parola_kurallari(yeni_sifre)
     if eksikler:
         raise ValueError("Parola şu kuralları sağlamıyor: " + ", ".join(eksikler) + ".")
@@ -85,9 +82,9 @@ async def sifreyi_sifirla(token: str, yeni_sifre: str) -> None:
                 raise ValueError("Şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş.")
             await db.execute("UPDATE kullanicilar SET parola = $1 WHERE sicil = $2;", parola_hash, sicil)
             await db.execute(
-                """INSERT INTO kullanici_sifre_degisim_loglari (sicil, tur, talep_eden_kullanici_sicil)
-                   VALUES ($1, 'sifirlama', $1);""",
-                sicil,
+                """INSERT INTO kullanici_sifre_degisim_loglari (sicil, tur, talep_eden_kullanici_sicil, ip_adresi)
+                   VALUES ($1, 'sifirlama', $1, $2::inet);""",
+                sicil, ip,
             )
             # Şifre değişince açık kalmış tüm oturumlar kapatılır.
             await db.execute(
