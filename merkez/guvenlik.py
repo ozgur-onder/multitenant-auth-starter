@@ -1,3 +1,4 @@
+import secrets
 from datetime import datetime, timedelta, timezone
 import bcrypt
 import jwt
@@ -22,8 +23,15 @@ def sifre_dogrula(sifre: str, hashli: str) -> bool:
 
 
 def jwt_olustur(sicil: str) -> str:
-    bitis = datetime.now(timezone.utc) + timedelta(minutes=JWT_SURE_DAKIKA)
-    return jwt.encode({"sub": sicil, "exp": bitis}, JWT_GIZLI_ANAHTAR, algorithm=JWT_ALGORITMA)
+    simdi = datetime.now(timezone.utc)
+    yuk = {
+        "sub": sicil,
+        "iat": simdi,
+        "exp": simdi + timedelta(minutes=JWT_SURE_DAKIKA),
+        # Aynı saniyede yapılan iki giriş aynı token'ı üretmesin (oturum tablosunda token UNIQUE).
+        "jti": secrets.token_urlsafe(16),
+    }
+    return jwt.encode(yuk, JWT_GIZLI_ANAHTAR, algorithm=JWT_ALGORITMA)
 
 
 def jwt_coz(token: str) -> str | None:

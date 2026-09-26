@@ -3,7 +3,7 @@ from merkez.parola_kurallari import eksik_parola_kurallari
 from merkez.semalar.kurulum import KurulumGirisi
 from merkez.semalar.smtp import SmtpBilgileri
 from merkez.servisler.kurulum import ilk_kurulumu_yap
-from .._yardimci import _metin
+from sayfalar.ortak.bilesenler import alan_degeri
 
 
 def kurulumu_tamamla_butonu(
@@ -19,7 +19,7 @@ def kurulumu_tamamla_butonu(
 ) -> None:
     async def tikla() -> None:
         hata.text = ""
-        if not all(_metin(alan) for alan in (sicil, email, ad, soyad, parola, parola_tekrar)):
+        if not all(alan_degeri(girdi) for girdi in (sicil, email, ad, soyad, parola, parola_tekrar)):
             hata.text = "Yıldızlı (*) tüm alanlar zorunludur."
             return
         eksikler = eksik_parola_kurallari(parola.value or "")
@@ -33,10 +33,10 @@ def kurulumu_tamamla_butonu(
         buton.props("loading")
         try:
             await ilk_kurulumu_yap(KurulumGirisi(
-                sicil=_metin(sicil),
-                email=_metin(email),
-                ad=_metin(ad),
-                soyad=_metin(soyad),
+                sicil=alan_degeri(sicil),
+                email=alan_degeri(email),
+                ad=alan_degeri(ad),
+                soyad=alan_degeri(soyad),
                 parola=parola.value or "",
                 smtp=SmtpBilgileri(**smtp_verisi),
             ))

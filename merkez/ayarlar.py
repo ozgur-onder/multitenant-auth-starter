@@ -20,3 +20,6 @@ ENCRYPTION_KEY:    str = _zorunlu("ENCRYPTION_KEY")
 
 JWT_ALGORITMA:   str = "HS256"
 JWT_SURE_DAKIKA: int = int(os.environ.get("JWT_SURE_DAKIKA", "480"))
+
+# E-postalardaki bağlantılar bu adrese göre oluşturulur (örn. şifre sıfırlama).
+UYGULAMA_ADRESI: str = os.environ.get("UYGULAMA_ADRESI", "http://localhost:8000").rstrip("/")

@@ -4,26 +4,30 @@ from merkez.semalar.giris import GirisGirisi, GirisCiktisi
 
 
 async def giris_yap(veri: GirisGirisi, ip: str = "", tarayici: str = "") -> GirisCiktisi:
+    kimlik = veri.sicil_veya_eposta.strip()
+    sorgu = (
+        "SELECT sicil, parola FROM kullanicilar WHERE lower(email) = lower($1) AND durum = TRUE;"
+        if "@" in kimlik else
+        "SELECT sicil, parola FROM kullanicilar WHERE sicil = $1 AND durum = TRUE;"
+    )
     havuz = await vt_getir()
     async with havuz.acquire() as db:
-        kullanici = await db.fetchrow(
-            "SELECT sicil, parola FROM kullanicilar WHERE sicil = $1 AND durum = TRUE;",
-            veri.sicil,
-        )
+        kullanici = await db.fetchrow(sorgu, kimlik)
         if not kullanici or not sifre_dogrula(veri.parola, kullanici["parola"]):
             # Log tablosunda sicil FK olduğu için sadece var olan kullanıcının hatalı denemesi loglanır.
             if kullanici:
-                await _giris_logu_kaydet(db, veri.sicil, "basarisiz", ip, tarayici, "Geçersiz parola.")
-            raise ValueError("Sicil veya parola hatalı.")
+                await _giris_logu_kaydet(db, kullanici["sicil"], "basarisiz", ip, tarayici, "Geçersiz parola.")
+            raise ValueError("Sicil / e-posta veya parola hatalı.")
 
-        token = jwt_olustur(veri.sicil)
+        sicil = kullanici["sicil"]
+        token = jwt_olustur(sicil)
         await db.execute(
             """INSERT INTO kullanici_oturumlari (sicil, oturum_token, ip_adresi, tarayici)
                VALUES ($1, $2, $3::inet, $4);""",
-            veri.sicil, token, ip or None, tarayici,
+            sicil, token, ip or None, tarayici,
         )
-        await _giris_logu_kaydet(db, veri.sicil, "basarili", ip, tarayici)
-        return GirisCiktisi(token=token, sicil=veri.sicil)
+        await _giris_logu_kaydet(db, sicil, "basarili", ip, tarayici)
+        return GirisCiktisi(token=token, sicil=sicil)
 
 
 async def cikis_yap(token: str) -> None:

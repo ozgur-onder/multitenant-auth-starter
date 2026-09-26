@@ -12,6 +12,7 @@ from merkez.rotalar.kurulum import router as kurulum_router
 import sayfalar.kurulum          # noqa: F401  →  "/kurulum"  sayfasını kaydeder
 import sayfalar.giris            # noqa: F401  →  "/giris"    sayfasını kaydeder
 import sayfalar.sifremi_unuttum  # noqa: F401  →  "/sifremi-unuttum" sayfasını kaydeder
+import sayfalar.sifre_sifirla    # noqa: F401  →  "/sifre-sifirla" sayfasını kaydeder
 import sayfalar.panel            # noqa: F401  →  "/panel"    sayfasını kaydeder
 
 

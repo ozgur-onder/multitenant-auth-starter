@@ -1,28 +1,22 @@
 from nicegui import ui
-from merkez.servisler.sifre import sifirlama_talebi_olustur
+from sayfalar.ortak.bilesenler import alan, MesajKutusu
+from sayfalar.ortak.kimlik_iskeleti import kimlik_iskeleti
+from sayfalar.ortak.butonlar.giris_sayfasina_don import giris_sayfasina_don_butonu
+from .butonlar.baglanti_gonder import baglanti_gonder_butonu
 
 
 @ui.page("/sifremi-unuttum")
 async def sifremi_unuttum_sayfasi():
-    with ui.column().classes("items-center justify-center min-h-screen w-full"):
-        with ui.card().classes("w-full max-w-sm q-pa-md"):
-            ui.label("Şifremi Unuttum").classes("text-2xl font-bold text-center")
-            ui.separator()
-            ui.label("E-posta adresinizi girin, şifre sıfırlama bağlantısı göndereceğiz.").classes("text-caption text-grey-7")
-
-            email = ui.input("E-posta", placeholder="Örn: ornek@firma.com").classes("w-full")
-            bilgi  = ui.label("").classes("text-caption")
-
-            async def gonder():
-                bilgi.text = ""
-                adres = (email.value or "").strip()
-                if not adres:
-                    bilgi.classes(replace="text-negative text-caption")
-                    bilgi.text = "E-posta adresi boş olamaz."
-                    return
-                await sifirlama_talebi_olustur(adres)
-                bilgi.classes(replace="text-positive text-caption")
-                bilgi.text = "Eğer bu e-posta kayıtlıysa, sıfırlama bağlantısı gönderildi."
-
-            ui.button("Gönder", on_click=gonder).props("color=primary").classes("w-full")
-            ui.link("Giriş sayfasına dön", "/giris").classes("text-caption")
+    with kimlik_iskeleti(
+        "Şifremi Unuttum",
+        "Sicil numaranızı ve kayıtlı e-posta adresinizi girin. Bilgiler eşleşirse "
+        "şifre sıfırlama bağlantısı e-posta adresinize gönderilir.",
+        "lock_reset",
+    ) as icerik:
+        sicil = alan("Sicil No", "20260001", ikon="badge").props("outlined")
+        email = alan("E-posta", "ad@firma.com", ikon="mail").props("outlined")
+        mesaj = MesajKutusu()
+        sicil.on_value_change(mesaj.temizle)
+        email.on_value_change(mesaj.temizle)
+        baglanti_gonder_butonu(icerik, mesaj, sicil=sicil, email=email)
+        giris_sayfasina_don_butonu()

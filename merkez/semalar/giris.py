@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class GirisGirisi(BaseModel):
-    sicil: str
+    sicil_veya_eposta: str
     parola: str
 
 
