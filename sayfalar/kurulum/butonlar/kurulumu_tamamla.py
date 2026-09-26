@@ -15,15 +15,19 @@ def kurulumu_tamamla_butonu(
     ad: ui.input,
     soyad: ui.input,
     parola: ui.input,
+    parola_tekrar: ui.input,
 ) -> None:
     async def tikla() -> None:
         hata.text = ""
-        if not all(_metin(alan) for alan in (sicil, email, ad, soyad, parola)):
+        if not all(_metin(alan) for alan in (sicil, email, ad, soyad, parola, parola_tekrar)):
             hata.text = "Yıldızlı (*) tüm alanlar zorunludur."
             return
         eksikler = eksik_parola_kurallari(parola.value or "")
         if eksikler:
             hata.text = "Parola şu kuralları sağlamıyor: " + ", ".join(eksikler) + "."
+            return
+        if parola.value != parola_tekrar.value:
+            hata.text = "Parolalar eşleşmiyor."
             return
 
         buton.props("loading")

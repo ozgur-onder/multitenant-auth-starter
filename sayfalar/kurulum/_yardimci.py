@@ -1,12 +1,28 @@
 from nicegui import ui
+from merkez.metin_islemleri import turkce_buyuk_harf
 
 
 def _alan(label: str, placeholder: str = "", password: bool = False, genislik: str = "w-full") -> ui.input:
-    inp = ui.input(label, placeholder=f"Örn: {placeholder}" if placeholder else "").classes(genislik)
+    inp = ui.input(
+        label,
+        placeholder=f"Örn: {placeholder}" if placeholder else "",
+        password=password,
+        password_toggle_button=password,
+    ).classes(genislik)
     inp.props("dense")
-    if password:
-        inp.props("type=password")
     return inp
+
+
+# Dönüşüm tarayıcıda yapılır; sunucuya gidip gelseydi hızlı yazarken harfler kaybolurdu.
+_TARAYICIDA_BUYUK_HARF = (
+    "const b=this.selectionStart,s=this.selectionEnd,u=this.value.toLocaleUpperCase('tr-TR');"
+    "if(u!==this.value){this.value=u;this.setSelectionRange(b,s);}"
+)
+
+
+def _buyuk_harfle_yazdir(alan: ui.input) -> None:
+    alan.props(f'oninput="{_TARAYICIDA_BUYUK_HARF}"')
+    alan.on("blur", lambda: alan.set_value(turkce_buyuk_harf(alan.value or "")))
 
 
 def _sayi_alani(label: str, placeholder: str = "", basamak: int = 10, genislik: str = "w-full") -> ui.input:

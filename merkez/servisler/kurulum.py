@@ -2,6 +2,7 @@ from asyncpg import Record
 from asyncpg.pool import PoolConnectionProxy
 from merkez.veritabani import vt_getir
 from merkez.guvenlik import sifreyi_hashle
+from merkez.metin_islemleri import turkce_buyuk_harf
 from merkez.parola_kurallari import eksik_parola_kurallari
 from merkez.sabitler import SISTEM_YONETICISI_ROL_KODU
 from merkez.semalar.kurulum import KurulumGirisi
@@ -58,7 +59,7 @@ async def ilk_kurulumu_yap(veri: KurulumGirisi) -> None:
                 """INSERT INTO kullanicilar
                    (sicil, ad, soyad, email, parola, olusturan_kullanici_sicil)
                    VALUES ($1, $2, $3, $4, $5, 'SYSTEM');""",
-                veri.sicil, veri.ad, veri.soyad, veri.email, parola_hash,
+                veri.sicil, turkce_buyuk_harf(veri.ad), turkce_buyuk_harf(veri.soyad), veri.email, parola_hash,
             )
             await db.execute(
                 """INSERT INTO kullanici_yetkileri
