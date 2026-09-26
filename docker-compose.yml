@@ -3,10 +3,12 @@ services:
   veritabani:
     image: postgres:16-alpine
     restart: unless-stopped
+    command: ["postgres", "-c", "timezone=Europe/Istanbul"]
     environment:
       POSTGRES_DB:       ${POSTGRES_DB:-multitenant_auth}
       POSTGRES_USER:     ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_SIFRE}
+      TZ:                Europe/Istanbul
     volumes:
       - veritabani_verisi:/var/lib/postgresql/data
       - ./psql:/psql:ro
@@ -25,6 +27,7 @@ services:
     env_file: .env
     environment:
       VERITABANI_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_SIFRE}@veritabani:5432/${POSTGRES_DB:-multitenant_auth}
+      TZ: Europe/Istanbul
     ports:
       - "8000:8000"
     depends_on:

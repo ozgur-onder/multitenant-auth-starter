@@ -21,6 +21,11 @@ def _metin(alan: ui.input) -> str:
 
 
 def _aciklama(metin: str) -> None:
-    with ui.row().classes("items-start gap-2 q-pa-xs q-mb-xs bg-blue-1 rounded-borders w-full flex-nowrap"):
-        ui.icon("info", color="primary").classes("text-base")
+    with ui.row().classes("items-center gap-3 q-px-sm q-py-xs q-mb-xs bg-blue-1 rounded-borders w-full no-wrap"):
+        ui.icon("info", color="primary", size="sm")
         ui.label(metin).classes("text-caption text-grey-8")
+
+
+def _degisince_hatayi_temizle(hata: ui.label, *alanlar: ui.input) -> None:
+    for alan in alanlar:
+        alan.on_value_change(lambda: hata.set_text(""))

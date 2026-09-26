@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from merkez.semalar.smtp import SmtpBilgileri
 
 
 class KurulumGirisi(BaseModel):
@@ -7,5 +8,4 @@ class KurulumGirisi(BaseModel):
     soyad: str
     email: str
     parola: str
-    firma_kodu: str
-    firma_adi: str
+    smtp: SmtpBilgileri
