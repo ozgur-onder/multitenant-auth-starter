@@ -12,7 +12,7 @@ echo "────────────────────────�
 
 # 1. Bağımsız tablolar (FK yok)
 echo "→ [1/6] Temel tablolar..."
-$PSQL -f /psql/firma/firma_table.sql
+$PSQL -f /psql/firma/firma_tablosu.sql
 $PSQL -f /psql/kullanicilar/kullanicilar_table.sql
 $PSQL -f /psql/roller/roller_table.sql
 $PSQL -f /psql/yetkiler/yetkiler_table.sql

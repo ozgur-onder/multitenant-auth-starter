@@ -1,25 +1,12 @@
 from nicegui import ui
-from merkez.veritabani import vt_getir
+from merkez.servisler.kurulum import kurulum_yapilmis_mi
 from .adim_smtp import smtp_adimini_olustur
 from .adim_kullanici import kullanici_adimini_olustur
 
 
-async def _kurulum_yapilmis_mi() -> bool:
-    try:
-        havuz = await vt_getir()
-        async with havuz.acquire() as db:
-            sayi = await db.fetchval(
-                "SELECT COUNT(*) FROM kullanici_yetkileri ky "
-                "JOIN roller r ON ky.rol_id = r.id WHERE r.rol_kodu = 1"
-            )
-        return (sayi or 0) > 0
-    except Exception:
-        return False
-
-
 @ui.page("/kurulum")
 async def kurulum_sayfasi():
-    if await _kurulum_yapilmis_mi():
+    if await kurulum_yapilmis_mi():
         ui.navigate.to("/giris")
         return
 

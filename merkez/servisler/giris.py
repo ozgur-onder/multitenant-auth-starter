@@ -11,7 +11,9 @@ async def giris_yap(veri: GirisGirisi, ip: str = "", tarayici: str = "") -> Giri
             veri.sicil,
         )
         if not kullanici or not sifre_dogrula(veri.parola, kullanici["parola"]):
-            await _giris_logu_kaydet(db, veri.sicil, "basarisiz", ip, tarayici, "Geçersiz sicil veya parola.")
+            # Log tablosunda sicil FK olduğu için sadece var olan kullanıcının hatalı denemesi loglanır.
+            if kullanici:
+                await _giris_logu_kaydet(db, veri.sicil, "basarisiz", ip, tarayici, "Geçersiz parola.")
             raise ValueError("Sicil veya parola hatalı.")
 
         token = jwt_olustur(veri.sicil)

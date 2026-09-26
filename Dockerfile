@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["python", "sunucu.py"]
+CMD ["uvicorn", "sunucu:app", "--host", "0.0.0.0", "--port", "8000"]

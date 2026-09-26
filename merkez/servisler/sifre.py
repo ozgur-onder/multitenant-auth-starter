@@ -1,6 +1,6 @@
 import secrets
-from datetime import datetime, timedelta, timezone
 from merkez.veritabani import vt_getir
+from merkez.guvenlik import sifreyi_hashle
 
 
 async def sifirlama_talebi_olustur(email: str) -> str | None:
@@ -12,18 +12,20 @@ async def sifirlama_talebi_olustur(email: str) -> str | None:
         if not kullanici:
             return None
         token = secrets.token_urlsafe(32)
-        gecerlilik = datetime.now(timezone.utc) + timedelta(hours=1)
-        await db.execute(
-            """INSERT INTO sifre_sifirlama_talepleri (sicil, token, gecerlilik_suresi)
-               VALUES ($1, $2, $3)
-               ON CONFLICT (sicil) DO UPDATE SET token = $2, gecerlilik_suresi = $3, kullanildi = FALSE;""",
-            kullanici["sicil"], token, gecerlilik,
-        )
+        async with db.transaction():
+            await db.execute(
+                "UPDATE sifre_sifirlama_talepleri SET kullanildi = TRUE WHERE sicil = $1 AND kullanildi = FALSE;",
+                kullanici["sicil"],
+            )
+            await db.execute(
+                """INSERT INTO sifre_sifirlama_talepleri (sicil, token, gecerlilik_suresi)
+                   VALUES ($1, $2, NOW() + INTERVAL '1 hour');""",
+                kullanici["sicil"], token,
+            )
         return token
 
 
 async def sifreyi_sifirla(token: str, yeni_sifre: str) -> bool:
-    from merkez.guvenlik import sifreyi_hashle
     havuz = await vt_getir()
     async with havuz.acquire() as db:
         talep = await db.fetchrow(

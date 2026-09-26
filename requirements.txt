@@ -5,7 +5,7 @@ nicegui
 openpyxl
 python-dotenv
 asyncpg
-passlib[bcrypt]
+bcrypt
 PyJWT
 SQLAlchemy
 alembic
